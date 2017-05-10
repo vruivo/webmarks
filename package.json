@@ -1,0 +1,23 @@
+{
+  "name": "webmarks",
+  "version": "1.0.0",
+  "description": "bookmarks service",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "bookmarks",
+    "webmarks",
+    "favorites"
+  ],
+  "author": "Vitor Ruivo",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2"
+  },
+  "devDependencies": {
+    "morgan": "^1.8.1"
+  }
+}
