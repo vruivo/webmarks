@@ -31,7 +31,16 @@
 
     </div>
 
+
     <!-- <script src="dist/build.js"></script> -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+      var socket = io();
+      
+      socket.on('new', function(data) {
+        console.log(data);
+      });
+    </script>
     <script type="text/javascript">
       function addUrl() {
         var url = document.querySelector("#url-input");
@@ -41,17 +50,18 @@
           return;
         }
 
-        $.post({
-          url: 'api/add',
-          data: JSON.stringify({url:url.value}),
-          contentType: "application/json"
-        })
-        .success(function success(data) {
-          console.log(data);
-        })
-        .error(function error(err) {
-          console.log(err);
-        })
+        // $.post({
+        //   url: 'api/add',
+        //   data: JSON.stringify({url:url.value}),
+        //   contentType: "application/json"
+        // })
+        // .success(function success(data) {
+        //   console.log(data);
+        // })
+        // .error(function error(err) {
+        //   console.log(err);
+        // })
+        socket.emit('add', {url:url.value});
       }
     </script>
 

@@ -15,7 +15,8 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.17.1",
-    "express": "^4.15.2"
+    "express": "^4.15.2",
+    "socket.io": "^2.0.1"
   },
   "devDependencies": {
     "morgan": "^1.8.1"
