@@ -1,3 +1,5 @@
+// const http = require('http');
+// const https = require('https');
 const request = require('request');
 const fs = require('fs');
 
@@ -83,6 +85,18 @@ module.exports = {
     request(url, callback);
   },
   downloadFile: function downloadFile(filename, url, callback) {
-    request(url).pipe(fs.createWriteStream(filename));
+    request('https://api.jquery.com/jquery.postas/')
+    .on('error', function () {
+      console.log("error");
+      callback(true);
+      return;
+    })
+    .pipe(fs.createWriteStream(filename)
+      .on('close', function functionName() {
+        console.log("close fs");
+        callback();
+        return;
+      })
+    );
   }
 }

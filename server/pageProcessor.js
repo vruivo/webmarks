@@ -4,12 +4,11 @@ module.exports = {
   getUrlInfo
 }
 
-function getUrlInfo(url, client_socket) {
-  const http = require('http');
-  const https = require('https');
-  const request = require('request');
+function getUrlInfo(url, client_socket, cache_dir) {
+  console.log("--");
   console.log(url);
 
+  if (!cache_dir) cache_dir = ".";
 
   utils.httpGET(url, function (error, response, body) {
     console.log('error:', error); // Print the error if one occurred
@@ -17,26 +16,33 @@ function getUrlInfo(url, client_socket) {
     // console.log('body:', body); // Print the HTML for the Google homepage.
     console.log("----");
 
-    var page = getPageDetails(body);
+    if (! error) {
+      var page = getPageDetails(body);
 
-    // base url
-    // console.log(url);
-    var url_start = url.indexOf('//') + 2;
-    // console.log(url.substring(url_start, url.indexOf('/', url_start)));
-    page.base_url = url.substring(url_start, url.indexOf('/', url_start));
-    page.url = url;
-    console.log(page);
-    // client_socket.emit('new', page);
+      // base url
+      var url_start = url.indexOf('//') + 2;
+      page.base_url = url.substring(url_start, url.indexOf('/', url_start));
+      page.url = url;
 
-    getFavicon({
-      filename: page.base_url,
-      favicon_url: page.favicon,
-      base_url: page.base_url
-    }, function (error, response, body) {
-      console.log('error:', error);
-      console.log('statusCode:', response && response.statusCode);
-      console.log('body:', body);
-    });
+      console.log(page);
+
+      getFavicon({
+        filename: cache_dir + "/" + page.base_url,
+        favicon_url: page.favicon,
+        base_url: page.base_url
+      }, function (error) {
+        if (error) {
+          // TODO: should just get a default favicon
+          client_socket.emit('newfail', page);
+        }
+        else {
+          client_socket.emit('new', page);
+        }
+      });
+    }
+    else {
+      client_socket.emit('newfail', page);
+    }
 
   })
 }
@@ -106,9 +112,14 @@ function getFavicon(data_obj, callback) {
   var filename = data_obj.filename;
   var url = data_obj.favicon_url;
   var base_url = data_obj.base_url;
-console.log("cenas");
-  if (url[0] === '/' && url[0] === '/') {
-    utils.downloadFile(filename, "https:" +url);
+
+  // TODO: search cache first
+
+  if (url[0] === '/' && url[1] === '/') {
+    utils.downloadFile(filename, "https:" +url, function functionName(err) {
+      // console.log(err);
+      callback(err);
+    });
   }
   else {
     console.log("boing-----------");

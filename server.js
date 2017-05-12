@@ -2,6 +2,8 @@ var app = require('express')();
 var http = require('http').Server(app);
 var wsio = require('socket.io')(http);
 
+const fs = require('fs');
+
 const pageProcessor = require('./server/pageProcessor');
 
 // var express        = require('express');
@@ -14,6 +16,14 @@ var morgan         = require('morgan');
   // data         = require('./test-data');
 
 // var app = module.exports = express();
+
+const CACHEDIR = "./cache";
+try {
+  fs.mkdirSync(CACHEDIR);
+} catch (e) {
+  if (e.code !== 'EEXIST')
+    throw e;
+}
 
 // app.engine('html', require('ejs').renderFile);
 // app.set('view engine', 'html');
@@ -51,12 +61,9 @@ app.get('/', function(req, res) {
 wsio.on('connection', function(socket) {
   console.log('a user connected');
 
-  // socket.on('message', function(msg) {
-  //   console.log('message: ' + msg);
-  // });
   socket.on('add', function(data) {
     console.log(data);
-    pageProcessor.getUrlInfo(data.url, socket);
+    pageProcessor.getUrlInfo(data.url, socket, CACHEDIR);
   });
 });
 
