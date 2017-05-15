@@ -29,13 +29,24 @@
         </div>
       </div>
 
-      <div class="row">
+      <div class="row" id="item-row">
         <div class="col-md-2" id="favicon"></div>
         <div class="col-md-4" id="base_url"></div>
         <div class="col-md-6" id="title"></div>
       </div>
 
+      <div id="item-insert"></div>
+
     </div>
+
+
+    <template id="item-template">
+      <div class="row" id="item-row">
+        <div class="col-md-2" id="favicon">1</div>
+        <div class="col-md-4" id="base_url">2</div>
+        <div class="col-md-6" id="title">3</div>
+      </div>
+    </template>
 
 
     <!-- <script src="dist/build.js"></script> -->
@@ -45,6 +56,24 @@
 
       socket.on('new', function(data) {
         console.log(data);
+        // classic
+        // var favicon_el = document.querySelector("#favicon");
+        // var title_el = document.querySelector("#title");
+        // var base_url_el = document.querySelector("#base_url");
+        // title_el.innerHTML = "asd"
+        // favicon_el.appendChild(document.createTextNode("sssasd"))
+        // document.querySelector("#base_url").appendChild(document.createTextNode("sss11asd"))
+
+        // fragment
+        // var fragment = document.createDocumentFragment();
+        // fragment.appendChild(document.createElement('div').appendChild(document.createTextNode("sssasd")))
+        // document.querySelector("#item-row").appendChild(fragment)
+
+        // template
+        // NOTES: importNode IE9, template Edge
+        var clone = document.importNode(document.querySelector("#item-template").content, true);
+        clone.querySelector("#base_url").innerHTML = 4;
+        document.querySelector("#item-insert").appendChild(clone);
       });
     </script>
     <script type="text/javascript">

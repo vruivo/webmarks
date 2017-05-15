@@ -85,15 +85,16 @@ module.exports = {
     request(url, callback);
   },
   downloadFile: function downloadFile(filename, url, callback) {
-    request('https://api.jquery.com/jquery.postas/')
-    .on('error', function () {
-      console.log("error");
-      callback(true);
+    console.log("Downloading >> " + url);
+    request(url)
+    .on('error', function (err) {
+      // console.log("error");
+      callback(err);
       return;
     })
     .pipe(fs.createWriteStream(filename)
       .on('close', function functionName() {
-        console.log("close fs");
+        // console.log("close fs");
         callback();
         return;
       })

@@ -52,6 +52,20 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
+app.get('/icon/:id', function(req, res) {
+  var filepath = __dirname + '/cache/' + req.params.id;
+
+  fs.access(filepath, fs.constants.F_OK | fs.constants.R_OK, (err) => {
+    // console.log(err ? 'no access!' : 'can read/write');
+    if (!err)
+      res.sendFile(filepath);
+    else {
+      res.send("no file");
+    }
+  });
+
+});
+
 // app.post('/api/add', function(req, res) {
 //   console.log(req.body);
 //   res.json("data");
