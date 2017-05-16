@@ -20,14 +20,13 @@ function getUrlInfo(url, client_socket, cache_dir) {
       var page = getPageDetails(body);
 
       // base url
-      var url_start = url.indexOf('//') + 2;
-      page.base_url = url.substring(url_start, url.indexOf('/', url_start));
+      page.base_url = getBaseUrl(url);
       page.url = url;
 
       console.log(page);
 
       getFavicon({
-        filename: cache_dir + "/" + page.base_url,
+        filename: cache_dir + "/" + page.base_url + ".ico",
         favicon_url: page.favicon,
         base_url: page.base_url
       }, function (error) {
@@ -36,6 +35,7 @@ function getUrlInfo(url, client_socket, cache_dir) {
           client_socket.emit('newfail', page);
         }
         else {
+          page.favicon = page.base_url + ".ico";
           client_socket.emit('new', page);
         }
       });
@@ -45,6 +45,13 @@ function getUrlInfo(url, client_socket, cache_dir) {
     }
 
   })
+}
+
+function getBaseUrl(full_url) {
+  // base url == hostname
+  var url_start = full_url.indexOf('//') + 2;
+  var base_url = full_url.substring(url_start, full_url.indexOf('/', url_start));
+  return base_url;
 }
 
 // function getHtmlTag(html, tag) {
@@ -86,9 +93,16 @@ function getPageDetails(html) {
     if (start_index !== -1 && end_index !== -1) { // link tag found
       var link = html.substring(start_index, end_index);
 
-      if (link.search(/rel="(shortcut )?icon"/i) !== -1) {  // check if is favicon
-        start_index = link.indexOf('href="') + 6;
-        end_index = link.indexOf('"', start_index);
+      if (link.search(/rel="?(shortcut )?icon"?/i) !== -1) {  // check if is favicon
+        start_index = link.indexOf('href=') + 5;
+        if (link[start_index] === '"')
+          start_index++;
+
+        end_index = link.indexOf(' ', start_index);
+        if (end_index === -1)
+          end_index = link.length;  // does not include end tag
+        if (link[end_index-1] === '"')
+          end_index--;
 
         if (start_index !== -1 && end_index !== -1) {
           favicon_href = link.substring(start_index, end_index);
@@ -110,19 +124,30 @@ function getPageDetails(html) {
 
 function getFavicon(data_obj, callback) {
   var filename = data_obj.filename;
-  var url = data_obj.favicon_url;
+  var favicon_url = data_obj.favicon_url;
   var base_url = data_obj.base_url;
 
   // TODO: search cache first
 
-  if (url[0] === '/' && url[1] === '/') {
-    utils.downloadFile(filename, "https:" +url, function functionName(err) {
+  if (! favicon_url) {
+    callback("no favicon url");
+    return;
+  }
+
+  // favicon url processors/interpreters
+  if (favicon_url[0] === '/' && favicon_url[1] === '/') {
+    utils.downloadFile(filename, "https:" +favicon_url, function functionName(err) {
       // console.log(err);
+      callback(err);
+    });
+  }
+  else if (favicon_url[0] === '/') {
+    utils.downloadFile(filename, "https://" + base_url + favicon_url, function functionName(err) {
       callback(err);
     });
   }
   else {
     console.log("boing-----------");
-    console.log(url);
+    console.log(favicon_url);
   }
 }

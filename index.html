@@ -42,9 +42,9 @@
 
     <template id="item-template">
       <div class="row" id="item-row">
-        <div class="col-md-2" id="favicon">1</div>
-        <div class="col-md-4" id="base_url">2</div>
-        <div class="col-md-6" id="title">3</div>
+        <div class="col-md-6" id="title"></div>
+        <div class="col-md-4" id="base_url"></div>
+        <img id="favicon" src="" alt="">
       </div>
     </template>
 
@@ -71,9 +71,11 @@
 
         // template
         // NOTES: importNode IE9, template Edge
-        var clone = document.importNode(document.querySelector("#item-template").content, true);
-        clone.querySelector("#base_url").innerHTML = 4;
-        document.querySelector("#item-insert").appendChild(clone);
+        var new_item = document.importNode(document.querySelector("#item-template").content, true);
+        new_item.querySelector("#title").appendChild(document.createTextNode(data.title));
+        new_item.querySelector("#base_url").appendChild(document.createTextNode(data.base_url));
+        new_item.querySelector("#favicon").setAttribute('src', 'icon/'+data.favicon);
+        document.querySelector("#item-insert").appendChild(new_item);
       });
     </script>
     <script type="text/javascript">
