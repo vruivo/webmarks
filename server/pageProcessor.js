@@ -99,8 +99,10 @@ function getPageDetails(html) {
           start_index++;
 
         end_index = link.indexOf(' ', start_index);
-        if (end_index === -1)
+        if (end_index === -1)  // end of string
           end_index = link.length;  // does not include end tag
+        if (link[end_index-1] === '/')
+          end_index--;
         if (link[end_index-1] === '"')
           end_index--;
 
