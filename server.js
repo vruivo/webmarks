@@ -1,4 +1,5 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var wsio = require('socket.io')(http);
 
@@ -6,7 +7,6 @@ const fs = require('fs');
 
 const pageProcessor = require('./server/pageProcessor');
 
-// var express        = require('express');
 var bodyParser     = require('body-parser');
     // methodOverride = require('method-override'),
     // errorHandler   = require('errorhandler'),
@@ -32,7 +32,7 @@ app.use(morgan('dev'));
 // app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 // app.use(methodOverride());
-// app.use(express.static('.'));
+app.use(express.static('client'));
 
 // var env = process.env.NODE_ENV;
 // console.log(env);
@@ -47,10 +47,10 @@ app.use(bodyParser.json());
 //   app.use(errorHandler());
 // }
 
-app.get('/', function(req, res) {
-  // res.render(__dirname + '/public/index.html');
-  res.sendFile(__dirname + '/index.html');
-});
+// app.get('/', function(req, res) {
+//   // res.render(__dirname + '/public/index.html');
+//   res.sendFile(__dirname + '/client/index.html');
+// });
 
 app.get('/icon/:id', function(req, res) {
   var filepath = __dirname + '/cache/' + req.params.id;

@@ -40,16 +40,32 @@
     </div>
 
 
+    <!-- <template id="item-template">
+      <div class="row" id="item-row"
+        style="border-color:burlywood; border-width:1px; border-style:solid">
+        <img id="favicon" src="" alt="" style="vertical-align:baseline"
+          height="32" width="32">
+        <div style="display:inline-block">
+          <div class="col-md-6" id="title"></div>
+          <div class="col-md-4" id="base_url"></div>
+        </div>
+      </div>
+    </template> -->
+
     <template id="item-template">
-      <div class="row" id="item-row">
-        <div class="col-md-6" id="title"></div>
-        <div class="col-md-4" id="base_url"></div>
-        <img id="favicon" src="" alt="">
+      <div class="row" id="item-row" style="display:flex; align-items:center;
+        border-color:burlywood; border-width:1px; border-style:solid">
+        <img id="favicon" src="" alt="" height="32" width="32">
+        <div style="display:flex; flex-direction:column">
+          <div class="col-md-6" id="title"></div>
+          <div class="col-md-4" id="base_url"></div>
+        </div>
       </div>
     </template>
 
 
     <script src="/socket.io/socket.io.js"></script>
+    <script src="index.js"></script>
     <script type="text/javascript">
       var socket = io();
 
