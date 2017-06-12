@@ -29,11 +29,11 @@
         </div>
       </div>
 
-      <div class="row" id="item-row">
+      <!-- <div class="row" id="item-row">
         <div class="col-md-2" id="favicon"></div>
         <div class="col-md-4" id="base_url"></div>
         <div class="col-md-6" id="title"></div>
-      </div>
+      </div> -->
 
       <div id="item-insert"></div>
 
@@ -52,6 +52,7 @@
       </div>
     </template> -->
 
+    <!-- template using display:flex -->
     <template id="item-template">
       <div class="row" id="item-row" style="display:flex; align-items:center;
         border-color:burlywood; border-width:1px; border-style:solid">
@@ -71,7 +72,7 @@
 
       socket.on('new', function(data) {
         console.log(data);
-        // classic
+        // -- classic --
         // var favicon_el = document.querySelector("#favicon");
         // var title_el = document.querySelector("#title");
         // var base_url_el = document.querySelector("#base_url");
@@ -79,12 +80,12 @@
         // favicon_el.appendChild(document.createTextNode("sssasd"))
         // document.querySelector("#base_url").appendChild(document.createTextNode("sss11asd"))
 
-        // fragment
+        // -- fragment --
         // var fragment = document.createDocumentFragment();
         // fragment.appendChild(document.createElement('div').appendChild(document.createTextNode("sssasd")))
         // document.querySelector("#item-row").appendChild(fragment)
 
-        // template
+        // -- template --
         // NOTES: importNode IE9, template Edge
         var new_item = document.importNode(document.querySelector("#item-template").content, true);
         new_item.querySelector("#title").appendChild(document.createTextNode(data.title));

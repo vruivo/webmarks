@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var wsio = require('socket.io')(http);
+var session = require('express-session');
 
 const fs = require('fs');
 
@@ -29,10 +30,21 @@ try {
 // app.set('view engine', 'html');
 // app.set('views', 'public');
 app.use(morgan('dev'));
-// app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+// app.use(bodyParser.text());
 // app.use(methodOverride());
-app.use(express.static('client'));
+
+app.use(session({ secret: 'example' }));  // dev only
+
+function checkAuth(req, res, next) {
+  if (!req.session || !req.session.user_id) {
+    res.send('You are not authorized to view this page');
+  } else {
+    next();
+  }
+}
 
 // var env = process.env.NODE_ENV;
 // console.log(env);
@@ -47,10 +59,29 @@ app.use(express.static('client'));
 //   app.use(errorHandler());
 // }
 
-// app.get('/', function(req, res) {
-//   // res.render(__dirname + '/public/index.html');
-//   res.sendFile(__dirname + '/client/index.html');
-// });
+// https://stackoverflow.com/questions/7990890/how-to-implement-login-auth-in-node-js/8003291#8003291
+// https://scotch.io/tutorials/easy-node-authentication-setup-and-local
+
+
+app.post('/login', function (req, res) {
+  var post = req.body;
+  console.log(">", req.body);
+  if (post.user === 'myuser' && post.password === 'mypassword') {
+    req.session.user_id = 123;
+    console.log("ssadsadasd");
+    res.redirect('/');
+  } else {
+    res.send('Bad user/pass');
+  }
+});
+
+app.get('/logout', function (req, res) {
+  delete req.session.user_id;
+  res.redirect('/login');
+});
+
+app.use(express.static('client/public', {extensions: ['html']}));
+app.use(checkAuth, express.static('client/private', {extensions: ['html']}));
 
 app.get('/icon/:id', function(req, res) {
   var filepath = __dirname + '/cache/' + req.params.id;
