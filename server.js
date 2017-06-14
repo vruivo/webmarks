@@ -5,18 +5,12 @@ var wsio = require('socket.io')(http);
 var session = require('express-session');
 
 const fs = require('fs');
-
 const pageProcessor = require('./server/pageProcessor');
-
 var bodyParser     = require('body-parser');
+const dirty = require('dirty')('my.db');
     // methodOverride = require('method-override'),
-    // errorHandler   = require('errorhandler'),
 var morgan         = require('morgan');
-    // routes         = require('./backend'),
-    // api            = require('./backend/api');
-  // data         = require('./test-data');
 
-// var app = module.exports = express();
 
 const CACHEDIR = "./cache";
 try {
@@ -26,17 +20,13 @@ try {
     throw e;
 }
 
-// app.engine('html', require('ejs').renderFile);
-// app.set('view engine', 'html');
-// app.set('views', 'public');
+
 app.use(morgan('dev'));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-// app.use(bodyParser.text());
-// app.use(methodOverride());
 
-app.use(session({ secret: 'example' }));  // dev only
+app.use(session({ secret: 'example' }));  // dev only !
 
 function checkAuth(req, res, next) {
   if (!req.session || !req.session.user_id) {
@@ -46,29 +36,13 @@ function checkAuth(req, res, next) {
   }
 }
 
-// var env = process.env.NODE_ENV;
-// console.log(env);
-// if ('development' == env) {
-//   app.use(errorHandler({
-//     dumpExceptions: true,
-//     showStack: true
-//   }));
-// }
-//
-// if ('production' == app.get('env')) {
-//   app.use(errorHandler());
-// }
-
 // https://stackoverflow.com/questions/7990890/how-to-implement-login-auth-in-node-js/8003291#8003291
 // https://scotch.io/tutorials/easy-node-authentication-setup-and-local
 
-
 app.post('/login', function (req, res) {
   var post = req.body;
-  console.log(">", req.body);
   if (post.user === 'myuser' && post.password === 'mypassword') {
     req.session.user_id = 123;
-    console.log("ssadsadasd");
     res.redirect('/');
   } else {
     res.send('Bad user/pass');
@@ -111,6 +85,7 @@ wsio.on('connection', function(socket) {
     pageProcessor.getUrlInfo(data.url, socket, CACHEDIR);
   });
 });
+
 
 // app.listen(8080);
 http.listen(8080);
