@@ -61,7 +61,6 @@ app.get('/icon/:id', function(req, res) {
   var filepath = __dirname + '/cache/' + req.params.id;
 
   fs.access(filepath, fs.constants.F_OK | fs.constants.R_OK, (err) => {
-    // console.log(err ? 'no access!' : 'can read/write');
     if (!err)
       res.sendFile(filepath);
     else {
@@ -71,18 +70,25 @@ app.get('/icon/:id', function(req, res) {
 
 });
 
-// app.post('/api/add', function(req, res) {
-//   console.log(req.body);
-//   res.json("data");
-//   getUrlInfo(req.body.url);
-// });
 
 wsio.on('connection', function(socket) {
-  console.log('a user connected');
+  // console.log('a user connected');
 
   socket.on('add', function(data) {
-    console.log(data);
-    pageProcessor.getUrlInfo(data.url, socket, CACHEDIR);
+    pageProcessor.getUrlInfo(data.url, socket, CACHEDIR)
+    .then(function(data) {
+      data.filename = CACHEDIR + "/" + data.base_url + ".ico";
+      return pageProcessor.getFavicon(data);
+    })
+    .then(function (data) {
+      data.favicon = data.base_url + ".ico";
+      delete data.filename;
+      socket.emit('new', data);
+    })
+    .catch(function(err) {
+      console.log('err:', err);
+      socket.emit('newfail', err);
+    });
   });
 });
 
@@ -90,3 +96,7 @@ wsio.on('connection', function(socket) {
 // app.listen(8080);
 http.listen(8080);
 console.log('Webmarks backend running on port 8080...');
+
+// TODO: save fav on db
+// TODO: load favs from db on login
+// TODO: polish web & code

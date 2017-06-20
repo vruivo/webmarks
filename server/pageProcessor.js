@@ -1,49 +1,35 @@
 const utils = require('./utils');
 
 module.exports = {
-  getUrlInfo
+  getUrlInfo,
+  getFavicon
 }
 
 function getUrlInfo(url, client_socket, cache_dir) {
-  console.log("--");
-  console.log(url);
+  return new Promise(function(resolve, reject) {
+    console.log("--");
+    console.log(url);
 
-  if (!cache_dir) cache_dir = ".";
+    if (!cache_dir) cache_dir = ".";
 
-  utils.httpGET(url, function (error, response, body) {
-    console.log('error:', error); // Print the error if one occurred
-    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    // console.log('body:', body); // Print the HTML for the Google homepage.
-    console.log("----");
+    utils.httpGET(url, function (error, response, body) {
+      //console.log('error:', error); // Print the error if one occurred
+      //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+      // console.log('body:', body); // Print the HTML for the Google homepage.
+      //console.log("----");
 
-    if (! error) {
-      var page = getPageDetails(body);
+      if (! error) {
+        var page = getPageDetails(body);
+        page.base_url = getBaseUrl(url);
+        page.url = url;
 
-      // base url
-      page.base_url = getBaseUrl(url);
-      page.url = url;
+        resolve(page);
+      }
+      else {
+        reject();
+      }
 
-      console.log(page);
-
-      getFavicon({
-        filename: cache_dir + "/" + page.base_url + ".ico",
-        favicon_url: page.favicon,
-        base_url: page.base_url
-      }, function (error) {
-        if (error) {
-          // TODO: should just get a default favicon
-          client_socket.emit('newfail', page);
-        }
-        else {
-          page.favicon = page.base_url + ".ico";
-          client_socket.emit('new', page);
-        }
-      });
-    }
-    else {
-      client_socket.emit('newfail', page);
-    }
-
+    })
   })
 }
 
@@ -53,18 +39,6 @@ function getBaseUrl(full_url) {
   var base_url = full_url.substring(url_start, full_url.indexOf('/', url_start));
   return base_url;
 }
-
-// function getHtmlTag(html, tag) {
-//   var start_tag = '<' + tag + '>';
-//   var end_tag = '</' + tag + '>';
-//   var start_tag_index = html.indexOf(start_tag) + start_tag.length;
-//   var end_tag_index = html.indexOf(end_tag);
-//
-//   console.log(start_tag_index);
-//   console.log(end_tag_index);
-//
-//   console.log(html.substring(start_tag_index, end_tag_index));
-// }
 
 function getPageDetails(html) {
   var data = {};
@@ -76,7 +50,6 @@ function getPageDetails(html) {
   var end_index = html.indexOf(end_tag);
 
   if (start_index != -1 && end_index != -1) {
-    // console.log(html.substring(start_index, end_index));
     data.title = html.substring(start_index, end_index);
   }
 
@@ -114,7 +87,7 @@ function getPageDetails(html) {
       }
     }
   }
-  // console.log(favicon_href);
+
   data.favicon = favicon_href;
   // NOTE: some sites have multiple favicons with different sizes
   //            (must be 16x16 pixels or 32x32 pixels)
@@ -124,32 +97,42 @@ function getPageDetails(html) {
   return data;
 }
 
-function getFavicon(data_obj, callback) {
-  var filename = data_obj.filename;
-  var favicon_url = data_obj.favicon_url;
-  var base_url = data_obj.base_url;
+function getFavicon(data_obj) {
+  return new Promise(function(resolve, reject) {
+    var filename = data_obj.filename;
+    var favicon_url = data_obj.favicon;
+    var base_url = data_obj.base_url;
 
-  // TODO: search cache first
+    // TODO: search cache first
 
-  if (! favicon_url) {
-    callback("no favicon url");
-    return;
-  }
+    if (! favicon_url) {
+      reject("no favicon url");
+      return;
+    }
 
-  // favicon url processors/interpreters
-  if (favicon_url[0] === '/' && favicon_url[1] === '/') {
-    utils.downloadFile(filename, "https:" +favicon_url, function functionName(err) {
-      // console.log(err);
-      callback(err);
-    });
-  }
-  else if (favicon_url[0] === '/') {
-    utils.downloadFile(filename, "https://" + base_url + favicon_url, function functionName(err) {
-      callback(err);
-    });
-  }
-  else {
-    console.log("boing-----------");
-    console.log(favicon_url);
-  }
+    // favicon url processors/interpreters
+    if (favicon_url[0] === '/' && favicon_url[1] === '/') {
+      utils.downloadFile(filename, "https:" +favicon_url, function functionName(err) {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(data_obj);
+        }
+      });
+    }
+    else if (favicon_url[0] === '/') {
+      utils.downloadFile(filename, "https://" + base_url + favicon_url, function functionName(err) {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(data_obj);
+        }
+      });
+    }
+    else {
+      reject("unsupported favicon url: " + favicon_url);
+    }
+  })
 }
