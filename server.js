@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var wsio = require('socket.io')(http);
+var sio = require('socket.io')(http);
 var session = require('express-session');
 
 const fs = require('fs');
@@ -26,11 +26,13 @@ app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use(session({ secret: 'example' }));  // dev only !
+var sessionMid = session({ secret: 'example' });  // dev only !
+app.use(sessionMid);
 
 function checkAuth(req, res, next) {
   if (!req.session || !req.session.user_id) {
-    res.send('You are not authorized to view this page');
+    // res.send('You are not authorized to view this page');
+    res.redirect('/login');
   } else {
     next();
   }
@@ -71,8 +73,18 @@ app.get('/icon/:id', function(req, res) {
 });
 
 
-wsio.on('connection', function(socket) {
+sio.use(function(socket, next){
+  sessionMid(socket.request, socket.request.res, next);
+});
+
+sio.on('connection', function(socket) {
   // console.log('a user connected');
+  // console.log(socket.request.session);
+
+  if (socket.request.session.user_id == undefined) {
+    socket.disconnect();
+    return;
+  }
 
   socket.on('add', function(data) {
     pageProcessor.getUrlInfo(data.url, socket, CACHEDIR)
@@ -83,6 +95,19 @@ wsio.on('connection', function(socket) {
     .then(function (data) {
       data.favicon = data.base_url + ".ico";
       delete data.filename;
+
+      var dbval = dirty.get(socket.request.session.user_id);
+      if (! dbval) {
+        var dbval = {};
+        dbval.favs = [ data ];
+        dirty.set(socket.request.session.user_id, { 'data': dbval });
+      }
+      else {
+        // console.log(dbval);
+        dbval.data.favs.push(data);
+        dirty.set(socket.request.session.user_id, { 'data': dbval.data });
+      }
+
       socket.emit('new', data);
     })
     .catch(function(err) {
@@ -90,6 +115,7 @@ wsio.on('connection', function(socket) {
       socket.emit('newfail', err);
     });
   });
+
 });
 
 
