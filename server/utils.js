@@ -2,6 +2,7 @@
 // const https = require('https');
 const request = require('request');
 const fs = require('fs');
+const dirty = require('dirty')('my.db');
 
 module.exports = {
   httpGET: function httpGET(url, callback) {
@@ -84,6 +85,7 @@ module.exports = {
     // });
     request(url, callback);
   },
+
   downloadFile: function downloadFile(filename, url, callback) {
     console.log("Downloading >> " + url);
     request(url)
@@ -99,5 +101,28 @@ module.exports = {
         return;
       })
     );
+  },
+
+  dbSaveFav: function dbSaveFav(user_id, fav_obj) {
+    var dbval = dirty.get(user_id);
+    if (! dbval) {
+      var dbval = {};
+      dbval.favs = [ fav_obj ];
+      dirty.set(user_id, { 'data': dbval });
+    }
+    else {
+      // console.log(dbval);
+      dbval.data.favs.push(fav_obj);
+      dirty.set(user_id, { 'data': dbval.data });
+    }
+  },
+
+  dbGetFavs: function dbGetFavs(user_id) {
+    var dbval = dirty.get(user_id);
+    if (dbval && dbval.data && dbval.data.favs)
+      return dbval.data.favs;
+    else
+      return [];
   }
+
 }

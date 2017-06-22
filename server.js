@@ -3,12 +3,12 @@ var app = express();
 var http = require('http').Server(app);
 var sio = require('socket.io')(http);
 var session = require('express-session');
+const utils = require('./server/utils');
 
 const fs = require('fs');
 const pageProcessor = require('./server/pageProcessor');
 var bodyParser     = require('body-parser');
-const dirty = require('dirty')('my.db');
-    // methodOverride = require('method-override'),
+
 var morgan         = require('morgan');
 
 
@@ -93,20 +93,11 @@ sio.on('connection', function(socket) {
       return pageProcessor.getFavicon(data);
     })
     .then(function (data) {
-      data.favicon = data.base_url + ".ico";
+      data.icon = data.base_url + ".ico";
       delete data.filename;
+      delete data.favicon;
 
-      var dbval = dirty.get(socket.request.session.user_id);
-      if (! dbval) {
-        var dbval = {};
-        dbval.favs = [ data ];
-        dirty.set(socket.request.session.user_id, { 'data': dbval });
-      }
-      else {
-        // console.log(dbval);
-        dbval.data.favs.push(data);
-        dirty.set(socket.request.session.user_id, { 'data': dbval.data });
-      }
+      utils.dbSaveFav(socket.request.session.user_id, data);
 
       socket.emit('new', data);
     })
@@ -116,6 +107,11 @@ sio.on('connection', function(socket) {
     });
   });
 
+  socket.on('getfavs', function(data) {
+    var favs = utils.dbGetFavs(socket.request.session.user_id);
+    socket.emit('favslist', favs);
+  });
+
 });
 
 
@@ -123,6 +119,5 @@ sio.on('connection', function(socket) {
 http.listen(8080);
 console.log('Webmarks backend running on port 8080...');
 
-// TODO: save fav on db
-// TODO: load favs from db on login
+// TODO: web - show error msg
 // TODO: polish web & code

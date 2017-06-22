@@ -30,7 +30,7 @@
       </div>
 
       <!-- <div class="row" id="item-row">
-        <div class="col-md-2" id="favicon"></div>
+        <div class="col-md-2" id="icon"></div>
         <div class="col-md-4" id="base_url"></div>
         <div class="col-md-6" id="title"></div>
       </div> -->
@@ -43,7 +43,7 @@
     <!-- <template id="item-template">
       <div class="row" id="item-row"
         style="border-color:burlywood; border-width:1px; border-style:solid">
-        <img id="favicon" src="" alt="" style="vertical-align:baseline"
+        <img id="icon" src="" alt="" style="vertical-align:baseline"
           height="32" width="32">
         <div style="display:inline-block">
           <div class="col-md-6" id="title"></div>
@@ -55,8 +55,9 @@
     <!-- template using display:flex -->
     <template id="item-template">
       <div class="row" id="item-row" style="display:flex; align-items:center;
-        border-color:burlywood; border-width:1px; border-style:solid">
-        <img id="favicon" src="" alt="" height="32" width="32">
+        border-color:burlywood; border-width:1px; border-style:solid;
+        margin-top: 5px; padding-left: 5px">
+        <img id="icon" src="" alt="" height="32" width="32">
         <div style="display:flex; flex-direction:column">
           <div class="col-md-6" id="title"></div>
           <div class="col-md-4" id="base_url"></div>
@@ -70,31 +71,14 @@
     <script type="text/javascript">
       var socket = io();
 
-      socket.on('new', function(data) {
-        console.log(data);
-        // -- classic --
-        // var favicon_el = document.querySelector("#favicon");
-        // var title_el = document.querySelector("#title");
-        // var base_url_el = document.querySelector("#base_url");
-        // title_el.innerHTML = "asd"
-        // favicon_el.appendChild(document.createTextNode("sssasd"))
-        // document.querySelector("#base_url").appendChild(document.createTextNode("sss11asd"))
+      socket.emit('getfavs');
 
-        // -- fragment --
-        // var fragment = document.createDocumentFragment();
-        // fragment.appendChild(document.createElement('div').appendChild(document.createTextNode("sssasd")))
-        // document.querySelector("#item-row").appendChild(fragment)
-
-        // -- template --
-        // NOTES: importNode IE9, template Edge
-        var new_item = document.importNode(document.querySelector("#item-template").content, true);
-        new_item.querySelector("#title").appendChild(document.createTextNode(data.title));
-        new_item.querySelector("#base_url").appendChild(document.createTextNode(data.base_url));
-        new_item.querySelector("#favicon").setAttribute('src', 'icon/'+data.favicon);
-        document.querySelector("#item-insert").appendChild(new_item);
+      socket.on('favslist', function(data) {
+        data.forEach(function(item) {
+          addNewFav(item);
+        });
       });
-    </script>
-    <script type="text/javascript">
+
       function addUrl() {
         var url = document.querySelector("#url-input");
 
@@ -103,19 +87,13 @@
           return;
         }
 
-        // $.post({
-        //   url: 'api/add',
-        //   data: JSON.stringify({url:url.value}),
-        //   contentType: "application/json"
-        // })
-        // .success(function success(data) {
-        //   console.log(data);
-        // })
-        // .error(function error(err) {
-        //   console.log(err);
-        // })
         socket.emit('add', {url:url.value});
       }
+
+      socket.on('new', function(data) {
+        addNewFav(data);
+      });
+
     </script>
 
   </body>
