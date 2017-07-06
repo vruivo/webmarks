@@ -132,7 +132,7 @@ function getFavicon(data_obj) {
       });
     }
     else {
-      reject("unsupported favicon url: " + favicon_url);
+      reject("unsupported favicon url type: " + favicon_url);
     }
   })
 }

@@ -15,17 +15,22 @@
     <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
     <!-- <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> -->
   <!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
+
   </head>
 
   <body>
 
     <div id="app" class="container">
 
-      <div class="row">
+      <div class="page-header">
+        <h1>Webmarks</h1>
+      </div>
+
+      <div class="row" style="margin-top:10px; margin-bottom:20px">
         <div class="col-md-10">
-          URL:
-          <input id="url-input" type="text" name="" value="">
-          <button type="button" name="button" onclick="addUrl()">Add</button>
+          <label for="url-input">URL: </label>
+          <input id="url-input" type="text" name="" value="" style="width:60%">
+          <button type="button" class="btn btn-primary" name="button" onclick="addUrl()">Add</button>
         </div>
       </div>
 
@@ -54,13 +59,15 @@
 
     <!-- template using display:flex -->
     <template id="item-template">
-      <div class="row" id="item-row" style="display:flex; align-items:center;
+      <div class="row" id="item-row">
+        <div class="col-md-8" style="display:flex; align-items:center;
         border-color:burlywood; border-width:1px; border-style:solid;
         margin-top: 5px; padding-left: 5px">
-        <img id="icon" src="" alt="" height="32" width="32">
-        <div style="display:flex; flex-direction:column">
-          <div class="col-md-6" id="title"></div>
-          <div class="col-md-4" id="base_url"></div>
+          <img id="icon" src="" alt="" height="32" width="32">
+          <div style="display:flex; flex-direction:column; width:100%">
+            <div class="col-md-6" id="title"></div>
+            <div class="col-md-4" id="base_url"></div>
+          </div>
         </div>
       </div>
     </template>
@@ -84,6 +91,7 @@
 
         if (!url.value) {
           console.log("empty");
+          showAlert('warning', "URL is empty");
           return;
         }
 
@@ -92,9 +100,15 @@
 
       socket.on('new', function(data) {
         addNewFav(data);
+        showAlert('success', "Success!");
+      });
+
+      socket.on('newfail', function(data) {
+        showAlert('danger', "Error :(");
       });
 
     </script>
+    <script src="js/jquery.bootstrap-growl.js"></script>
 
   </body>
 

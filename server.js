@@ -6,6 +6,7 @@ var session = require('express-session');
 const utils = require('./server/utils');
 
 const fs = require('fs');
+var fsconstants = fs.constants || fs;
 const pageProcessor = require('./server/pageProcessor');
 var bodyParser     = require('body-parser');
 
@@ -62,7 +63,7 @@ app.use(checkAuth, express.static('client/private', {extensions: ['html']}));
 app.get('/icon/:id', function(req, res) {
   var filepath = __dirname + '/cache/' + req.params.id;
 
-  fs.access(filepath, fs.constants.F_OK | fs.constants.R_OK, (err) => {
+  fs.access(filepath, fsconstants.F_OK | fsconstants.R_OK, (err) => {
     if (!err)
       res.sendFile(filepath);
     else {
