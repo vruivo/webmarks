@@ -13,11 +13,14 @@ function addNewFav(data) {
   // document.querySelector("#item-row").appendChild(fragment)
 
   // -- template --
-  // NOTES: importNode IE9, template Edge
+  // NOTES: importNode IE9, template Edge, addEventListener IE9
   var new_item = document.importNode(document.querySelector("#item-template").content, true);
   new_item.querySelector("#title").appendChild(document.createTextNode(data.title));
   new_item.querySelector("#base_url").appendChild(document.createTextNode(data.base_url));
   new_item.querySelector("#icon").setAttribute('src', 'icon/'+data.icon);
+  new_item.querySelector("#item").addEventListener('click', function() {
+    window.open(data.url);
+  });
   document.querySelector("#item-insert").appendChild(new_item);
 }
 
